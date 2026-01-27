@@ -16,7 +16,7 @@ def main():
         df = pd.DataFrame(data)
         df_filtrada = df[["_id", "text", "updatedAt", "sentCount"]]
         df_filtrada.columns = ["id", "text", "updated", "sent_count"]
-        df_filtrada.to_csv(f"data/processed/{date_today}_facts.csv", index = False)
+        df_filtrada.to_csv(f"data/processed/{date_today}_processed_facts.csv", index = False)
         
     else:
         print(f"Error: Status code - {response.status_code}")
