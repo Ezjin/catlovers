@@ -4,16 +4,16 @@
 O código faz a requisição da API e salva os arquivos em dois locais "/data/raw" os arquivos.json e "/data/processed" os arquivos .CSV já em formato tabular. Os nomes dos arquivos contém a data em que eles foram extraidos ("YYYY-mm-dd").
 
 2. Arquitetura GCP 
-  1. **Migração inicial**: `data/raw` → GCS 
+  * **Migração inicial**: `data/raw` → GCS 
     Usando partição por data no formato: gs://bucket/raw/facts/date=*/file.json
-  2. **Extração contínua**: Cloud Scheduler → Cloud Function → API → GCS
+  * **Extração contínua**: Cloud Scheduler → Cloud Function → API → GCS
     Assim continuamos extraindo os dados automaticamente, com o tempo de agentamento necessário.
-  3. **Raw layer**: External Table no BigQuery lê GCS particionado
+  * **Raw layer**: External Table no BigQuery lê GCS particionado
     Aqui, a table pode ser tanto external quanto nativa dependendo do crescimento e consumo.
     A Nativa é mais indicada para volumes grande.
-  4. **Silver layer**: SQL transforma External Table → insere na tabela Silver
+  * **Silver layer**: SQL transforma External Table → insere na tabela Silver
     Filtros necessários, normalização dos nomes de colunas e remoção de duplicados.
-  5. **Consumo**: Analistas consultam tabela Silver via BigQuery
+  * **Consumo**: Analistas consultam tabela Silver via BigQuery
 
 3. Especificação do Esquema da tabela Silver para Analytics
 
