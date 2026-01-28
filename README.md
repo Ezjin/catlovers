@@ -63,7 +63,7 @@ Tabela: facts_silver
 | Campo | Tipo | Modo | Descrição |
 |-------|------|------|-----------|
 | `id` | `STRING` | `REQUIRED` | Identificador único |
-| `text` | `STRING` | `REQUIRED` | Texto do Fato |
+| `fact_text` | `STRING` | `REQUIRED` | Texto do Fato |
 | `updated_at` | `TIMESTAMP` | `NULLABLE` | Timestamp de atualização na API |
 | `ingestion_date` | `DATE` | `REQUIRED` | Data de ingestão |
 | `sent_count` | `INT` | `NULLABLE` | Número de vezes que o fato foi enviado |
@@ -79,7 +79,7 @@ Tabela: facts_silver
 ```sql
 SELECT
     id,
-    text,
+    fact_text,
     updated_at,
     ingestion_date
 FROM project.dataset.facts_silver
@@ -99,7 +99,7 @@ EXPORT DATA OPTIONS (
 )
 AS
 SELECT
-  text,
+  fact_text,
   updated_at,
   ingestion_date
 FROM `project.dataset.facts_silver`
