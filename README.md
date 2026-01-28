@@ -29,46 +29,63 @@ Solução em GCP proposta:
 - **Google Cloud Storage**
   Armazena os dados brutos em formato JSON.
 
-2. Arquitetura GCP 
-    * **Migração inicial**: `data/raw` > GCS 
-        Usando partição por data no formato: gs://bucket/raw/facts/date=*/file.json
-    * **Extração contínua**: Cloud Scheduler > Cloud Function > API > GCS
-        Assim continuamos extraindo os dados automaticamente, com o tempo de agentamento necessário.
-    * **Raw layer**: External Table no BigQuery lê GCS particionado
-        Aqui, a table pode ser tanto external quanto nativa dependendo do crescimento e consumo.
-        A Nativa é mais indicada para volumes grande.
-    * **Silver layer**: SQL transforma External Table → insere na tabela Silver
-        Filtros necessários, normalização dos nomes de colunas e remoção de duplicados.
-    * **Consumo**: Analistas consultam tabela Silver via BigQuery
-    * **Updates**: PUB/SUB > Cloud Function > BigQuery
+Estrutura do bucket: gs://bucket/raw/facts/date=YYYY-MM-DD/file.json
 
-        Os updates podem ser orquestrados usando PUB/SUB para serem ativados quando novos arquivos forem salvos no passo da extração
+### Camada Raw
+- Os arquivos no bucket são lidos no BigQuery por meio de External Table.
+- Essa abordagem inicial reduz custos e permite rápida disponibilização.
+- Com o aumento de fatos, a camada raw passa a ser nativa, para evitar lentidão de leitura.
+- E os incrementos são feitos sempre usando o último dia de atualização.
 
-3. Especificação do Esquema da tabela Silver para Analytics
+### Camada Silver
+-Tabelas nativas no BigQuery
+- Responsáveis por:
+    - Normalização de colunas
+    - Conversão de tipos
+    - Remoção de duplicidades
+    - Padronização de Timestamp
+
+### Orquestação e atualizações
+- **Pub/Sub** é utilizado para disparar as cargas incrementais sempre que novos arquivos são adicionados ao bucket.
+- Uma Cloud Function consome esses eventos e realiza os INSERTS e UPDATES necessários.
+
+### Consumo
+- Time de analytics tem acesso direto a tabela Silver via BigQuery
+
+---
+
+## 3. Especificação do esquema da tabela Silver
+
+Tabela: facts_silver
+
+### Esquema
 
 | Campo | Tipo | Modo | Descrição |
 |-------|------|------|-----------|
 | `id` | `STRING` | `REQUIRED` | Identificador único |
 | `text` | `STRING` | `REQUIRED` | Texto do Fato |
 | `updated_at` | `TIMESTAMP` | `NULLABLE` | Timestamp de atualização na API |
-| `date` | `DATE` | `REQUIRED` | Data de ingestão |
+| `ingestion_date` | `DATE` | `REQUIRED` | Data de ingestão |
+| `sent_count` | `INT` | `NULLABLE` | Número de vezes que o fato foi enviado |
 
-4. Fatos de Agosto de 2020
+### Considerações adicionais
+- A tabela será particionada por `ingestion_date`
+- O campo `id` pode ser utilizado para deduplicação.
 
-´´´
-  SELECT
+--- 
+
+## 4. Consulta: Fatos atualizados em agosto de 2020
+SELECT
     id,
     text,
     updated_at,
-    date
+    ingestion_date
   FROM project.dataset.facts_silver
-  WHERE EXTRACT(YEAR FROM updated_at) = 2020
-    AND EXTRACT(MONTH FROM updated_at) = 8;
+  WHERE updated_at >= TIMESTAMP("2020-08-01")
+    AND updated_at < TIMESTAMP("2020-09-01");
 
-´´´
+## 5. Consulta: Amostra aleatória de 10% dos dados
 
-5. Consulta Aleatória (10%)
-´´´
 EXPORT DATA OPTIONS (
   uri = 'gs://qa-bucket/facts_qa_*.csv',
   format = 'CSV',
@@ -80,8 +97,6 @@ AS
 SELECT
   text,
   updated_at,
-  date
+  ingestion_date
 FROM `project.dataset.facts_silver`
 WHERE RAND() < 0.10;
-
-´´´
