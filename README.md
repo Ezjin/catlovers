@@ -76,20 +76,20 @@ Tabela: facts_silver
 
 ## 4. Consulta: Fatos atualizados em agosto de 2020
 
-```
+```sql
 SELECT
     id,
     text,
     updated_at,
     ingestion_date
-  FROM project.dataset.facts_silver
-  WHERE updated_at >= TIMESTAMP("2020-08-01")
-    AND updated_at < TIMESTAMP("2020-09-01");
+FROM project.dataset.facts_silver
+WHERE updated_at >= TIMESTAMP("2020-08-01")
+  AND updated_at < TIMESTAMP("2020-09-01");
 ```
 
 ## 5. Consulta: Amostra aleatória de 10% dos dados
 
-```
+```sql
 EXPORT DATA OPTIONS (
   uri = 'gs://qa-bucket/facts_qa_*.csv',
   format = 'CSV',
