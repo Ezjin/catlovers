@@ -23,7 +23,7 @@ Solução em GCP proposta:
 
 ### Ingestão
 - **Cloud Scheduler**:
-  Responsável por disparar a extração na periodissidade necessária.
+  Responsável por disparar a extração na periodicidade necessária.
 - **Cloud Functions**:
   Executa a lógica de extração da API.
 - **Google Cloud Storage**:
@@ -34,8 +34,8 @@ Estrutura do bucket: gs://bucket/raw/facts/date=YYYY-MM-DD/file.json
 ### Camada Raw
 - Os arquivos no bucket são lidos no BigQuery por meio de External Table.
 - Essa abordagem inicial reduz custos e permite rápida disponibilização.
-- Com o aumento de fatos, a camada raw passa a ser nativa, para evitar lentidão de leitura.
-- E os incrementos são feitos sempre usando o último dia de atualização.
+- Com o aumento de linhas (os fatos sobre gatos), a camada raw será transformada em tabela Nativa no BigQuery, para evitar lentidão de leitura.
+- E os incrementos são feitos sempre usando o último dia de ingestão.
 
 ### Camada Silver
 -Tabelas nativas no BigQuery
