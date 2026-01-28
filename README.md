@@ -22,11 +22,11 @@ A extração inicial é feita pelo script "extracao.py"
 Solução em GCP proposta:
 
 ### Ingestão
-- **Cloud Scheduler**
+- **Cloud Scheduler**:
   Responsável por disparar a extração na periodissidade necessária.
-- **Cloud Functions**
+- **Cloud Functions**:
   Executa a lógica de extração da API.
-- **Google Cloud Storage**
+- **Google Cloud Storage**:
   Armazena os dados brutos em formato JSON.
 
 Estrutura do bucket: gs://bucket/raw/facts/date=YYYY-MM-DD/file.json
@@ -75,6 +75,8 @@ Tabela: facts_silver
 --- 
 
 ## 4. Consulta: Fatos atualizados em agosto de 2020
+
+```
 SELECT
     id,
     text,
@@ -83,9 +85,11 @@ SELECT
   FROM project.dataset.facts_silver
   WHERE updated_at >= TIMESTAMP("2020-08-01")
     AND updated_at < TIMESTAMP("2020-09-01");
+```
 
 ## 5. Consulta: Amostra aleatória de 10% dos dados
 
+```
 EXPORT DATA OPTIONS (
   uri = 'gs://qa-bucket/facts_qa_*.csv',
   format = 'CSV',
@@ -100,3 +104,4 @@ SELECT
   ingestion_date
 FROM `project.dataset.facts_silver`
 WHERE RAND() < 0.10;
+```
