@@ -17,6 +17,7 @@ A extração inicial é feita pelo script "extracao.py"
 - Os arquivos seguem o padrão de nomenclatura: YYYY-mm-dd_fact.json e YYYY-mm-dd_fact.csv
 - Essa nomenclatura permite versionamento simples, rastreabilidade e reprocessamento quando necessário.
 
+---
 ## 2. Arquitetura na Google Cloud Platform (GCP)
 
 Solução em GCP proposta:
@@ -86,6 +87,7 @@ FROM project.dataset.facts_silver
 WHERE updated_at >= TIMESTAMP("2020-08-01")
   AND updated_at < TIMESTAMP("2020-09-01");
 ```
+---
 
 ## 5. Consulta: Amostra aleatória de 10% dos dados
 
